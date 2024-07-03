@@ -1,6 +1,6 @@
 # Tenka
 
-Tenka is a powerful and user-friendly Python package manager tailored for the Mojo programming language. The name `Tenka` is derived from the Japanese word `点火`, meaning "ignition," symbolizing my mission to fuel your Mojo's 🔥 capabilities and your development journey with ease and efficiency.
+Tenka is a powerful and user-friendly Python package manager tailored for the Mojo programming language. The name `Tenka` is derived from the Japanese word `点火`, meaning "ignition," symbolizing my mission to fuel Mojo's 🔥 capabilities and your development journey with ease and efficiency.
 
 With Tenka, you can effortlessly search and install from github, and remove Mojo packages in your projects, making your development process smoother and more efficient. 
 

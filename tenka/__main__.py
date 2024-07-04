@@ -10,7 +10,6 @@ class PackageManager:
     def __init__(self, env_name="base"):
         self.env = env_name
         self.home_directory = os.path.expanduser("~/.modular/pkg/packages.modular.com_mojo/lib")
-        print(os.path.join(self.home_directory, "base"))
         if not os.path.exists(os.path.join(self.home_directory, "base")):
             try:
                 shutil.copytree(self.home_directory+"/mojo/", self.home_directory+"/base/")
@@ -255,7 +254,78 @@ class PackageManager:
 
         except FileNotFoundError as e:
             raise (f"Package {package_name} not found.")
+    
+    def activate_env(self, env_name):
+        active_env_file_path = os.path.join(os.path.expanduser("~/.modular"), 'active_environment.json')
+        with open(active_env_file_path, 'r') as file:
+            active_env = json.load(file)
+        if active_env['active_environment'] == env_name:
+            print(f"Environment '{env_name}' is already active.")
+            return
+        base_dir = os.path.expanduser("~/.modular/pkg/packages.modular.com_mojo/lib")
+        env_dir = os.path.join(base_dir, env_name)
+        cfg_file_path = os.path.expanduser("~/.modular/modular.cfg")
+        if not os.path.exists(env_dir):
+            print(f"Environment '{env_name}' does not exist.")
+            return
+        with open(cfg_file_path, 'r') as file:
+            cfg_data = file.readlines()
+        with open(cfg_file_path, 'w') as file:
+            for line in cfg_data:
+                if line.startswith("import_path"):
+                    file.write(f"import_path = {env_dir}\n")
+                else:
+                    file.write(line)
+                    
+        active_env_file_path = os.path.join(os.path.expanduser("~/.modular"), 'active_environment.json')
+        with open(active_env_file_path, 'w') as file:
+            json.dump({"active_environment": env_name}, file, indent=4)
+        # zshrc_path = os.path.expanduser("~/.zshrc")
+        # with open(zshrc_path, "a") as zshrc_file:
+        #     zshrc_file.write(f'export PS1="({env_name}) $PS1"\n')
+        # os.system(f'source {zshrc_path}')
+        # os.system('source ~/.zshrc')
+         
+        print(f"Environment '{env_name}' activated. Use 'deactivate_env.py' to deactivate.")
+
+    def deactivate_env(self, env_name):
+        base_dir = os.path.expanduser("~/.modular/pkg/packages.modular.com_mojo/lib")
+        env_dir = os.path.join(base_dir, "base")
+        cfg_file_path = os.path.expanduser("~/.modular/modular.cfg")
+        if not os.path.exists(env_dir):
+            print(f"Environment '{env_name}' does not exist.")
+            return
+        with open(cfg_file_path, 'r') as file:
+            cfg_data = file.readlines()
             
+        with open(cfg_file_path, 'w') as file:
+            for line in cfg_data:
+                if line.startswith("import_path"):
+                    file.write(f"import_path = {env_dir}\n")
+                else:
+                    file.write(line)
+
+        active_env_file_path = os.path.join(os.path.expanduser("~/.modular"), 'active_environment.json')
+        with open(active_env_file_path, 'w') as file:
+            json.dump({"active_environment": "base"}, file, indent=4) 
+        # os.system('source ~/.zshrc')
+        # zshrc_path = os.path.expanduser("~/.zshrc")        
+        # with open(zshrc_path, "r") as zshrc_file:
+        #     lines = zshrc_file.readlines()
+        
+        # with open(zshrc_path, "w") as zshrc_file:
+        #     for line in lines:
+        #         if "PS1" not in line:
+        #             zshrc_file.write(line)
+        # os.system(f'source {zshrc_path}')
+        print("Environment deactivated.")
+
+    def current_env(self):
+        active_env_file_path = os.path.join(os.path.expanduser("~/.modular"), 'active_environment.json')
+        with open(active_env_file_path, 'r') as file:
+            active_env = json.load(file)
+        print(f"Current environment: {active_env['active_environment']}")
+
 def main():
     parser = argparse.ArgumentParser(description="Package Manager CLI")
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
@@ -265,6 +335,14 @@ def main():
 
     parser_remove = subparsers.add_parser('remove', help='remove help')
     parser_remove.add_argument("env_name", help="Name of the environment to remove")
+    
+    parser_activate = subparsers.add_parser('activate', help='activate help')
+    parser_activate.add_argument("env_name", help="Name of the environment to activate")
+
+    parser_deactivate = subparsers.add_parser('deactivate', help='deactivate help')
+    parser_deactivate.add_argument("env_name", help="Name of the environment to deactivate")
+
+    parser_current = subparsers.add_parser('current', help='current help')
 
     parser_install = subparsers.add_parser('install', help='install help')
     parser_install.add_argument("package_name", help="Name of the package to install")
@@ -282,14 +360,22 @@ def main():
 
     if args.command == "create":
         manager.create(args.env_name)
-    if args.command == "uninstall":
+    elif args.command == "uninstall":
         manager.uninstall(args.package_name)
-    if args.command == "install":
+    elif args.command == "install":
         manager.install_package(args.package_name, branch=args.branch)
+    elif args.command == "activate":
+        manager.activate_env(args.env_name)
+    elif args.command == "deactivate":
+        manager.deactivate_env(args.env_name)
+    elif args.command == "current":
+        manager.current_env()
     elif args.command == "search":
         manager.search_package(args.package_name)
     elif args.command == "remove":
         manager.remove_package(args.env_name)
+    else:
+        print("Invalid command specified. Use -h to see available commands.")
 
 if __name__ == "__main__":
     main()

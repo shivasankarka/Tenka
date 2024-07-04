@@ -7,14 +7,19 @@ import datetime
 import json
 
 class PackageManager:
-    def __init__(self, home_directory):
-        self.home_directory = os.getenv('MODULAR_HOME', os.path.expanduser('~/.modular'))
-        self.home_directory = os.path.join(self.home_directory, "pkg", "packages.modular.com_mojo", "lib", "mojo")
-        if not os.path.exists(self.home_directory):
-            os.makedirs(self.home_directory)
-        subprocess.run(f"export MOJO_INCLUDE_PATH={self.home_directory}", shell=True, check=True)
+    def __init__(self, env_name="base"):
+        self.env = env_name
+        self.home_directory = os.path.expanduser("~/.modular/pkg/packages.modular.com_mojo/lib")
+        print(os.path.join(self.home_directory, "base"))
+        if not os.path.exists(os.path.join(self.home_directory, "base")):
+            try:
+                shutil.copytree(self.home_directory+"/mojo/", self.home_directory+"/base/")
+            except shutil.Error as e:
+                print(f"Error copying files: {e}")
+                shutil.rmtree(self.home_directory+"/base")
+                return
 
-    def search(self, package_name):
+    def search_package(self, package_name):
         url = f"https://api.github.com/search/repositories?q={package_name}+language:mojo"
         response = requests.get(url)
         if response.status_code == 200:
@@ -156,7 +161,76 @@ class PackageManager:
         else:
             print(f"No package found for {package_name}")
         
-    def remove_package(self, package_name):
+    def remove_package(self, env_name):
+        shutil.rmtree(os.path.join(self.home_directory, env_name))
+        json_file_path = os.path.join(self.home_directory, 'environments.json')
+        with open(json_file_path, 'r') as f:
+            if f.read().strip():
+                f.seek(0)
+                environments = json.load(f)
+            else:
+                environments = []
+                
+        for i, env in enumerate(environments):
+            if env['name'] == env_name:
+                del environments[i]
+                break
+            
+        with open(json_file_path, 'w') as f:
+            json.dump(environments, f, indent=4)
+        
+        print(f"Environment {env_name} removed successfully.")
+
+    def create(self, env_name):
+        base_dir = os.path.expanduser("~/.modular/pkg/packages.modular.com_mojo/lib")
+        env_dir = os.path.join(base_dir, env_name)
+        
+        if not os.path.exists(os.path.join(self.home_directory, env_name)):
+            try:
+                shutil.copytree(self.home_directory+"/mojo/",os.path.join(self.home_directory, env_name))
+            except shutil.Error as e:
+                print(f"Error copying files: {e}")
+                shutil.rmtree(self.home_directory+"/base")
+                return 
+        else:
+            print(f"Environment '{env_name}' already exists.")
+            return
+            
+        print(f"Environment '{env_name}' created successfully at {env_dir}.")
+        
+        # Create or update the JSON file with environment information
+        json_file_path = os.path.join(self.home_directory, 'environments.json')
+        environment_info = {
+            'name': env_name,
+            'created_date': datetime.datetime.now().date().isoformat(),
+            'packages': []
+        }
+        
+        if os.path.exists(json_file_path):
+            with open(json_file_path, 'r') as f:
+                if f.read().strip():
+                    f.seek(0)  # reset file pointer to beginning
+                    environments = json.load(f)
+                else:
+                    environments = []
+                    
+            # Check if environment already exists
+            for i, env in enumerate(environments):
+                if env['name'] == env_name:
+                    # Overwrite existing environment info
+                    environments[i] = environment_info
+                    break
+                else:
+                    environments.append(environment_info)
+        else:
+            environments = [environment_info]
+        
+        with open(json_file_path, 'w') as f:
+            json.dump(environments, f, indent=4)
+        
+        print(f"Environment information saved to {json_file_path}")
+
+    def uninstall(self, package_name):
         try:
             if (os.path.exists(os.path.join(self.home_directory, f"{package_name}.mojopkg"))):
                 os.remove(os.path.join(self.home_directory, f"{package_name}.mojopkg"))
@@ -181,55 +255,45 @@ class PackageManager:
 
         except FileNotFoundError as e:
             raise (f"Package {package_name} not found.")
-
-    def create(self, package_name):
-        base_dir = os.path.expanduser("~/.modular_envs")
-        env_dir = os.path.join(base_dir, env_name)
-    
-        if os.path.exists(env_dir):
-            print(f"Environment '{env_name}' already exists.")
-            return
-    
-        os.makedirs(env_dir)
-        # Copy the base Mojo environment to the new environment directory
-        base_mojo_env = os.path.expanduser("~/.modular")
-        shutil.copytree(base_mojo_env, os.path.join(env_dir, ".modular"))
-        
-        print(f"Environment '{env_name}' created successfully at {env_dir}.")
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: create_env.py <env_name>")
-    else:
-        create_env(sys.argv[1])
             
 def main():
     parser = argparse.ArgumentParser(description="Package Manager CLI")
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
-    # create the parser for the "install" command
+    parser_create = subparsers.add_parser('create', help='create help')
+    parser_create.add_argument("env_name", help="Name of the environment to create")
+
+    parser_remove = subparsers.add_parser('remove', help='remove help')
+    parser_remove.add_argument("env_name", help="Name of the environment to remove")
+
     parser_install = subparsers.add_parser('install', help='install help')
     parser_install.add_argument("package_name", help="Name of the package to install")
     parser_install.add_argument("--branch", action='store_true', help="Search for branches")
 
-    # create the parser for the "search" command
     parser_search = subparsers.add_parser('search', help='search help')
     parser_search.add_argument("package_name", help="Name of the package to search")
 
-    # create the parser for the "remove" command
-    parser_remove = subparsers.add_parser('remove', help='remove help')
-    parser_remove.add_argument("package_name", help="Name of the package to remove")
+    parser_uninstall = subparsers.add_parser('uninstall', help='uninstall help')
+    parser_uninstall.add_argument("package_name", help="Name of the package to uninstall")
 
     args = parser.parse_args()
 
-    manager = PackageManager(home_directory="packages")
+    manager = PackageManager()
 
+    if args.command == "create":
+        manager.create(args.env_name)
+    if args.command == "uninstall":
+        manager.uninstall(args.package_name)
     if args.command == "install":
         manager.install_package(args.package_name, branch=args.branch)
     elif args.command == "search":
-        manager.search(args.package_name)
+        manager.search_package(args.package_name)
     elif args.command == "remove":
-        manager.remove_package(args.package_name)
+        manager.remove_package(args.env_name)
 
 if __name__ == "__main__":
     main()
+    # manager = PackageManager("base")
+    # manager.create("conda")
+    # manager.install_package("numojo")
+    # manager.remove_package("numojo")

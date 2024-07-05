@@ -6,13 +6,14 @@ With Tenka, you can effortlessly search and install from github, and remove Mojo
 
 ## Features
 
-- **Search Packages**: Quickly find the Mojo packages you need.
-- **Install Packages**: Easily install Mojo packages from GitHub repositories.
-- **Remove Packages**: Cleanly remove unwanted Mojo packages from your projects.
+- **Create & Remove environments**: Easily create virtual environments to isolate your projects and manage their dependencies and remove them easily. 
+- **Activate and deactivate environments**: Switch between different environments to work on different projects without conflicts.
+- **Install packages**: Install packages directly into a specific environment, ensuring that your project has the necessary dependencies.
+- **Search Packages**: Quickly find the Mojo packages you need from Github.
+- **Uninstall Packages**: Cleanly remove unwanted Mojo packages from your projects.
 
 ## Long terms goals
-- Ability to create and deactivate virtual environments
-- Ability to install packages to specific environments
+- Ability to create and deactivate mojo environments with different mojo versions.
 - Better control over package installation from GitHub
 - Improved dependency management
 - Support for package versioning
@@ -21,11 +22,15 @@ With Tenka, you can effortlessly search and install from github, and remove Mojo
 
 To get started with Tenka, you can install it using pip. Follow these simple steps:
 
-1. Navigate to the `tenka` directory:
+1. Clone the Tenka repository:
+    ```
+    git clone https://github.com/your-username/tenka.git
+    ```
+2. Navigate to the `tenka` directory:
     ```
     cd tenka
     ```
-2. Install Tenka in editable mode:
+3. Install Tenka in editable mode:
     ```
     pip install -e .
     ```
@@ -49,6 +54,34 @@ Once installed, you can use Tenka through the command line interface (CLI). Here
     ```
     tenka remove <package_name>
     ```
+
+- **Create an environment**:
+    ```
+    tenka create <env_name>
+    ```
+    Specify the name of the environment to create.
+
+- **Activate an environment**:
+    ```
+    tenka activate <env_name>
+    ```
+    Specify the name of the environment to activate.
+
+- **Deactivate the current environment**:
+    ```
+    tenka deactivate
+    ```
+    No arguments needed.
+
+- **Remove an environment**:
+    ```
+    tenka remove <env_name>
+    ```
+    Specify the name of the environment to remove.
+
+## Current Limitations:
+- **Mojo Version Management**: Tenka is currently working on supporting the management of different Mojo versions.
+- **GitHub Project Installation Limitation**: Tenka cannot install and package GitHub projects that do not adhere to the standard naming convention for their directories. For example, a repository named "xyz" should have a source directory named "xyz", not "xyzu".
 
 ## Contributing
 

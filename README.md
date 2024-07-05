@@ -97,7 +97,7 @@ Once installed, you can use Tenka through the command line interface (CLI). Here
     Specify the name of the environment to remove.
 
 ## Current Limitations:
-- **Mojo Version Management**: Tenka is currently working on supporting the management of different Mojo versions.
+- **Mojo Version Management**: Tenka currently doesn't support the management of different Mojo versions.
 - **GitHub Project Installation Limitation**: Tenka cannot install and package GitHub projects that do not adhere to the standard naming convention for their directories. For example, a repository named "xyz" should have a source directory named "xyz", not "xyzu".
 
 ## Contributing

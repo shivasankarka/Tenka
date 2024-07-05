@@ -1,8 +1,10 @@
 <a name="readme-top"></a>
+
 <div align="center">
-  <a href=""
+  <a href="">
     <img src="./assets/tenka_logo.png" alt="Logo" width="350" height="350">
   </a>
+
 
   <h1 align="center" style="font-size: 3em; color: white; font-family: 'Avenir'; text-shadow: 1px 1px red;">Tenka 点火</h1>
 

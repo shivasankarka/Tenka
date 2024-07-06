@@ -98,7 +98,7 @@ Once installed, you can use Tenka through the command line interface (CLI). Here
 
 ## Current Limitations:
 - **Mojo Version Management**: Tenka currently doesn't support the management of different Mojo versions.
-- **GitHub Project Installation Limitation**: Tenka cannot install and package GitHub projects that do not adhere to the standard naming convention for their directories. For example, a repository named "xyz" should have a source directory named "xyz", not "xyzu".
+- **GitHub Project Installation Limitation**: Tenka cannot install and package GitHub projects that do not contain main package directory with same name as repo. For example, a repository named "xyz" should have a source directory named "xyz" or "src", not "xyzud".
 
 ## Contributing
 

@@ -41,7 +41,7 @@ To get started with Tenka, you can install it using pip. Follow these simple ste
 
 1. Clone the Tenka repository:
     ```
-    git clone https://github.com/your-username/tenka.git
+    git clone https://github.com/shivasankarka/Tenka.git
     ```
 2. Navigate to the `tenka` directory:
     ```

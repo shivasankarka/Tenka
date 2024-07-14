@@ -52,6 +52,14 @@ To get started with Tenka, you can install it using pip. Follow these simple ste
     pip install -e .
     ```
 
+## Uninstall
+To uninstall Tenka, Follow these steps,
+
+1. Uninstall it through pip
+    ```
+    pip uninstall tenka
+    ```
+
 ## Usage
 
 Once installed, you can use Tenka through the command line interface (CLI). Here are some basic commands:

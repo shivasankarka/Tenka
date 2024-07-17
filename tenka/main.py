@@ -6,6 +6,8 @@ import argparse
 import datetime
 import json
 
+from .packages import search_package, get_branches
+
 class PackageManager:
     def __init__(self):
         self.home_directory = os.path.expanduser("~/.modular/pkg/packages.modular.com_mojo/lib")
@@ -20,7 +22,7 @@ class PackageManager:
         if not os.path.exists(os.path.join(os.path.expanduser("~/.modular"), 'active.json')):
             json_file_path = os.path.join(os.path.expanduser("~/.modular"), 'active.json')
             os.makedirs(os.path.dirname(json_file_path), exist_ok=True)
-            with open(json_file_path, 'w') as file:
+            with open(json_file_path, 'w', encoding='utf-8') as file:
                 json.dump({"active_environment": "base"}, file, indent=4)
             
         if not os.path.exists(os.path.join(os.path.expanduser("~/.modular"), 'environments.json')):
@@ -32,37 +34,6 @@ class PackageManager:
             }
             with open(envs_json_file_path, 'w') as file:
                 json.dump([environment_info], file, indent=4)
-
-    def search_package(self, package_name):
-        url = f"https://api.github.com/search/repositories?q={package_name}+language:mojo"
-        response = requests.get(url)
-        if response.status_code == 200:
-            search_results =  response.json()['items']
-            print(f"Package {package_name} found successfully at {search_results[0]['html_url']}")
-        else:
-            raise Exception("Failed to search GitHub")
-    
-        press = input("Do you want to install this package? (y/n): ")
-        if press == "y":
-            self.install_package(package_name)
-        else: 
-            quit()
-
-    def search_github(self, package_name):
-        url = f"https://api.github.com/search/repositories?q={package_name}+language:mojo"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()['items']
-        else:
-            raise Exception("Failed to search GitHub")
-
-    def get_branches(self, repo_full_name):
-        url = f"https://api.github.com/repos/{repo_full_name}/branches"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception("Failed to fetch branches")
 
     def download_package(self, repo_url, package_name, branch='main'):
         download_url = f"{repo_url}/archive/refs/heads/{branch}.zip"
@@ -422,7 +393,7 @@ def main():
     elif args.command == "current":
         manager.current_env()
     elif args.command == "search":
-        manager.search_package(args.package_name)
+        search_package(args.package_name, manager)
     elif args.command == "remove":
         manager.remove(args.env_name)
     else:

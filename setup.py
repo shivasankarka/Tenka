@@ -7,7 +7,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'tenka = tenka.__main__:main'
+            'tenka = tenka.main:main'
         ]
     },
     # other metadata

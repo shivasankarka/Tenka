@@ -69,7 +69,7 @@ def setup_tenka(modular_home: str = "~/.modular"):
         with open(os.path.join(home_dir, "environments.json"), "w") as file:
             json.dump(envs, file, indent=4)        
 
-    active_envs = {'active': 'base'}
+    active_envs = {'active': 'base', 'version': modular_version}
     if not os.path.exists(os.path.join(home_dir, "active.json")):
         with open(os.path.join(home_dir, "active.json"), "w") as file:
             json.dump(active_envs, file, indent=4)

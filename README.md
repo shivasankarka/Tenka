@@ -16,27 +16,27 @@
     <hr style="border-top: 1px solid white; width: 100%; margin: 20px 0;">
 </p>
 
-
 Tenka is a powerful and user-friendly package manager tailored for the Mojo programming language. The name `Tenka` is derived from the Japanese word `点火`, meaning "ignition," symbolizing my mission to fuel Mojo's 🔥 capabilities and your development journey with ease and efficiency.
 
-With Tenka, you can effortlessly search and install from github, and remove Mojo packages in your projects, making your development process smoother and more efficient. 
+With Tenka, you can effortlessly create, delete environments with different Mojo versions. You can search and install packges from github, and remove Mojo packages from environments, making your development process smoother and more efficient. 
 
 ## Features
 
-- **Create & Remove environments**: Easily create virtual environments to isolate your projects and manage their dependencies and remove them easily. 
-- **Activate and deactivate environments**: Switch between different environments to work on different projects without conflicts.
-- **Install packages**: Install packages directly into a specific environment, ensuring that your project has the necessary dependencies.
-- **Search Packages**: Quickly find the Mojo packages you need from Github.
-- **Uninstall Packages**: Cleanly remove unwanted Mojo packages from your projects.
+- **Create & Remove Environments**: Easily create virtual environments to isolate your projects, manage their dependencies, and remove them effortlessly.
+- **Activate and Deactivate Environments**: Seamlessly switch between different environments to work on various projects without conflicts.
+- **Install Packages**: Directly install packages into a specific environment to ensure your project has all necessary dependencies.
+- **Search Packages**: Quickly find the Mojo packages you need from GitHub.
+- **Uninstall Packages**: Safely remove unwanted Mojo packages from your projects.
+- **Package Modules**: Package local Mojo modules directly and add them to the currently active environment.
 
 ## Long terms goals
-- Ability to create and deactivate mojo environments with different mojo versions.
 - Better control over package installation from GitHub
 - Improved dependency management
 - Support for package versioning
 
-## Installation
+## Setting upx
 
+### Installation
 To get started with Tenka, you can install it using pip. Follow these simple steps:
 
 1. Clone the Tenka repository:
@@ -49,42 +49,27 @@ To get started with Tenka, you can install it using pip. Follow these simple ste
     ```
 3. Install Tenka in editable mode:
     ```
-    pip install -e .
+    python setup_tenka.py
     ```
+This will install `Tenka` to the `$HOME` path. You can remove the downloaded files after installation.  
 
-## Uninstall
+### Uninstall
 To uninstall Tenka, Follow these steps,
 
-1. Uninstall it through pip
+1. Uninstall it using the following command
     ```
-    pip uninstall tenka
+    rm -rf ~/.tenka 
     ```
 
 ## Usage
-
 Once installed, you can use Tenka through the command line interface (CLI). Here are some basic commands:
 
-- **Install a package**:
-    ```
-    tenka install <package_name> [--branch]
-    ```
-    Use the `--branch` option to specify a branch if needed.
-
-- **Search for a package**:
-    ```
-    tenka search <package_name>
-    ```
-
-- **Remove a package**:
-    ```
-    tenka remove <package_name>
-    ```
-
 - **Create an environment**:
+    To create a new environment, use the following command:
     ```
-    tenka create <env_name>
+    tenka create <env_name> [<version>]
     ```
-    Specify the name of the environment to create.
+    You can specify the name of the environment to create. The `<version>` parameter is optional, and if not provided, Tenka will install the latest Mojo version by default (Currently 24.4.0).
 
 - **Activate an environment**:
     ```
@@ -104,16 +89,40 @@ Once installed, you can use Tenka through the command line interface (CLI). Here
     ```
     Specify the name of the environment to remove.
 
-## Current Limitations:
-- **Mojo Version Management**: Tenka currently doesn't support the management of different Mojo versions.
-- **GitHub Project Installation Limitation**: Tenka cannot install and package GitHub projects that do not contain main package directory with same name as repo. For example, a repository named "xyz" should have a source directory named "xyz" or "src", not "xyzud".
+- **Package a Mojo modular**:
+    ```
+    tenka package <source_name> <package_name> [<source_path>]
+    ```
+    Specify the name of the source module and the package name to be used when importing the package. `<source_path>` is optional; if nott provided, Tenka will search it in current path automatically package and add it to the active environment. 
+
+- **Install a package**:
+    ```
+    tenka install <package_name> [--branch]
+    ```
+    Use the `--branch` option to specify a branch if needed. Tenka will install the package to the current active environment.
+
+- **Search for a package**:
+    ```
+    tenka search <package_name>
+    ```
+    This command searches for a package named `<package_name>` on GitHub.
+
+- **Remove a package**:
+    ```
+    tenka remove <package_name>
+    ```
+    This command removes the package named `<package_name>`.
+    
+
+- **GitHub Project Installation Limitation**: Tenka is unable to install and package GitHub projects that do not have a main package directory with the same name as the repository. For instance, a repository named "xyz" should have a source directory named "xyz" or "src", not "xyzud".
+- **Bash Support**: Tenka currently relies on zsh scripts for handling operations and therefore is only compatible with zsh on macOS. If you are interested in contributing to bash development, please open a pull request or issue and get in touch with me.
+- **Package dependencies**: Currently, As there are no standard Mojo package versioning system, Tenka lacks the capability to verify if a package will function correctly within a specific Mojo environment.
 
 ## Contributing
 
-Any contributions to tenka are welcome! If you have any ideas, suggestions, or bug reports, please feel free to open an issue or submit a pull request on our GitHub repository.
+Any contributions to Tenka are welcome! If you have ideas, suggestions, or bug reports, please don't hesitate to open an issue or submit a pull request on the GitHub repository.
 
 ## License
-
 Tenka is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
 I hope it makes your Mojo package management a breeze.

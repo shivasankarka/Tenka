@@ -1,7 +1,7 @@
 
 activate() {
-    env_name="$1"
-    if [ -z "$env_name" ]; then
+    new_env_name="$1"
+    if [ -z "$new_env_name" ]; then
         echo "Error: Environment name not provided"
         return 1
     fi
@@ -20,7 +20,7 @@ def check_env(env_name):
         else:
             sys.exit(1)  # failure
 
-check_env('$env_name')
+check_env('$new_env_name')
 "
 
     if [ $? -eq 1 ]; then
@@ -29,42 +29,52 @@ check_env('$env_name')
     fi
 
     if echo "$PATH" | grep -q "${HOME}/.modular/pkg/packages.modular.com_mojo/bin"; then
-        old_path="${HOME}/.modular/pkg/packages.modular.com_mojo/bin"
+        current_env_path="${HOME}/.modular/pkg/packages.modular.com_mojo/bin"
         current_env_name="mojo"
     else
-        active_env_path=$(echo "$PATH" | tr ':' '\n' | grep "${HOME}/.tenka/envs/[^/]*/bin" | head -n 1)
+        current_env_path=$(echo "$PATH" | tr ':' '\n' | grep "${HOME}/.tenka/envs/[^/]*/bin" | head -n 1)
         current_env_name=$(echo "$active_env_path" | sed -n 's|.*/envs/\([^/]*\)/bin|\1|p')
-        old_path="${active_env_path}"
     fi
 
-    new_path="${HOME}/.tenka/envs/${env_name}/bin"
+    new_path="${HOME}/.tenka/envs/${new_env_name}/bin"
     if [ ! -d "$new_path" ]; then
-        echo "Error: Environment '$env_name' does not exist"
+        echo "Error: Environment '$new_env_name' does not exist"
         return 1
     fi
 
-    export PATH=$(echo "$PATH" | tr ':' '\n' | sed "s|^$old_path$|$new_path|" | paste -sd: -)
-    
+new_env_version=$(python -c "
+import os 
+import json
+with open(os.path.expanduser('~/.tenka/environments.json'), 'r') as f:
+    envs = json.load(f)
+    for env in envs:
+        if env['name'] == '$new_env_name':
+            print(env['version'], end='')
+")
+if [ $? -eq 1 ]; then
+    echo "Error: Environment '$new_env_name' does not exist"
+    return 
+fi
+
+    export PATH=$(echo "$PATH" | tr ':' '\n' | sed "s|^$current_env_path$|$new_path|" | paste -sd: -)
     if [ "$current_env_name" = "mojo" ]; then
-        python "$HOME/.tenka/src/environments.py" change_cfg "mojo" "$env_name"
+        python "$HOME/.tenka/src/environments.py" edit_cfg "mojo" "$new_env_name"
     else
-        python "$HOME/.tenka/src/environments.py" change_cfg "$current_env_name" "$env_name"
+        python "$HOME/.tenka/src/environments.py" edit_cfg "$current_env_name" "$new_env_name"
     fi
   
-    
 python -c "
 import os
 import json
 
+
 with open(os.path.expanduser('~/.tenka/active.json'), 'w+') as f:
-    json.dump({'active': '$env_name'}, f)
+    json.dump({'active': '$new_env_name', 'version': '$new_env_version'}, f)
 "
-  
     echo "Environment '$env_name' activated"
 }
 
 deactivate() {
-    # Find the active environment by searching for a path that matches the format
     active_env=$(echo "$PATH" | tr ':' '\n' | grep "${HOME}/.tenka/envs/[^/]*/bin" | head -n 1)
     
     if [ -z "$active_env" ]; then

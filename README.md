@@ -142,7 +142,7 @@ Example:
    ```
 3. Run the setup file:
    ```
-   python setup_tenka.py
+   python setup.py
    ```
 
 ### Uninstallation

@@ -39,13 +39,14 @@ class PackageManager:
         else:
             raise Exception("Failed to download package")
 
-    def install_package(self, package_name, branch=False):
+    def install_package(self, package_name, branch=False, active_env="base"):
         try:
             # Get active environment
-            active_env_file_path = os.path.join(self.home_dir, 'active.json')
-            with open(active_env_file_path, 'r') as file:
-                temp = json.load(file)
-            active_env = temp.get('active')
+            # active_env_file_path = os.path.join(self.home_dir, 'active.json')
+            # with open(active_env_file_path, 'r') as file:
+                # temp = json.load(file)
+            # active_env = temp.get('active')
+            active_env = active_env
             if not active_env:
                 raise ValueError("No active environment found")
 
@@ -152,14 +153,15 @@ class PackageManager:
         except KeyError as e:
             print(f"Key error when updating environments.json: {str(e)}")
         
-    def uninstall(self, package_name):
+    def uninstall(self, package_name, active_env="base"):
         try:
             # Get active environment
-            active_env_file_path = os.path.join(self.home_dir, 'active.json')
+            # active_env_file_path = os.path.join(self.home_dir, 'active.json')
             try:
-                with open(active_env_file_path, 'r') as file:
-                    temp = json.load(file)
-                active_env = temp.get('active')
+                # with open(active_env_file_path, 'r') as file:
+                    # temp = json.load(file)
+                # active_env = temp.get('active')
+                active_env = active_env
                 if not active_env:
                     raise ValueError("No active environment found")
             except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
@@ -204,9 +206,10 @@ class PackageManager:
         except Exception as e:
             print(f"An unexpected error occurred: {str(e)}")
             
-    def list_all_packages(self):
-        with open(os.path.join(os.path.expanduser("~/.tenka"), 'active.json'), 'r') as f:
-            active_env = json.load(f)['active']
+    def list_all_packages(self, active_env="base"):
+        # with open(os.path.join(os.path.expanduser("~/.tenka"), 'active.json'), 'r') as f:
+            # active_env = json.load(f)['active']
+        active_env = active_env
 
         json_file_path = os.path.join(os.path.expanduser("~/.tenka"), 'environments.json')
         with open(json_file_path, 'r') as f:
@@ -237,14 +240,14 @@ if __name__ == "__main__":
         sys.exit(1)
 
     command = sys.argv[1]
-    if command == "install" and len(sys.argv) == 4:
-        manager.install_package(sys.argv[2], branch=sys.argv[3])
-    elif command == "uninstall" and len(sys.argv) == 3:
-        manager.uninstall(sys.argv[2])
+    if command == "install" and len(sys.argv) == 5:
+        manager.install_package(sys.argv[2], branch=sys.argv[3], active_env=sys.argv[4])
+    elif command == "uninstall" and len(sys.argv) == 4:
+        manager.uninstall(sys.argv[2], active_env=sys.argv[3])
     elif command == "search" and len(sys.argv) == 3:
         manager.search_package(sys.argv[2])
-    elif command == "list-pkgs" and len(sys.argv) == 2:
-        manager.list_all_packages()
+    elif command == "list-pkgs" and len(sys.argv) == 3:
+        manager.list_all_packages(active_env=sys.argv[2])
     elif command == "list-envs" and len(sys.argv) == 2:
         manager.list_all_environments()
     else:

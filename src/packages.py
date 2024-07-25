@@ -19,9 +19,9 @@ def update_package_metadata(active_env: str, package_name: str, branch: None):
             if active_env not in environments:
                 environments[active_env] = {
                     'name': active_env,
-                    'version': environments[active_env]['version'],
-                    'description': environments[active_env]['description'],
-                    'created': environments[active_env]['created'],
+                    'version': '',
+                    'description': '',
+                    'created': datetime.datetime.now().isoformat(),
                     'packages': []
                 }
             environments[active_env]['packages'].append(package_info)
@@ -29,11 +29,13 @@ def update_package_metadata(active_env: str, package_name: str, branch: None):
             json.dump(environments, f, indent=4)
             f.truncate()
     except FileNotFoundError:
-        print(f"File {json_file_path} not found")
+        print(f"Error: File {json_file_path} not found.")
     except json.JSONDecodeError:
-        print(f"Error decoding JSON from {json_file_path}")
-    except KeyError as e:
-        print(f"Key error when updating environments.json: {str(e)}")
+        print(f"Error: Invalid JSON format in {json_file_path}. Please check the file contents.")
+    except IOError as e:
+        print(f"Error: An I/O error occurred while accessing {json_file_path}: {str(e)}")
+    except Exception as e:
+        print(f"Error: An unexpected error occurred: {str(e)}")
 
 def get_latest_version():
     url = "https://docs.modular.com/mojo/changelog"
@@ -41,25 +43,23 @@ def get_latest_version():
         with urllib.request.urlopen(url) as response:
             html = response.read().decode('utf-8')
         
-        # version_pattern = r'<a href="#(v[\d.]+).*?" class=".*?">(v[\d.]+)\s*\(.*?\)</a>'
-        version_pattern =  r'<a class="table-of-contents__link toc-highlight" href="/mojo/changelog#(v[\d.]+)-.*?">(v[\d.]+)\s*\(.*?\)</a>'
+        version_pattern = r'<a class="table-of-contents__link toc-highlight" href="/mojo/changelog#(v[\d.]+)-.*?">(v[\d.]+)\s*\(.*?\)</a>'
         versions = re.findall(version_pattern, html)
 
         if versions:
             version = versions[0][1][1:]
-            print(version)
             if len(version) == 4:
                 return version + ".0"
-                # print(version + ".0")
             else:
                 return version
-                # print(version)
         else:
-            print("No versions found")
+            print("Error: No versions found in the changelog.")
+            return None
     except urllib.error.URLError as e:
-        print(f"An error occurred while fetching the webpage: {e}")
+        print(f"Error: Failed to fetch the changelog: {e}")
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"Error: An unexpected error occurred while fetching the latest version: {e}")
+    return None
 
 if __name__ == "__main__":
     if sys.argv[1] == "update_package_metadata":

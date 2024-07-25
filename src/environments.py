@@ -46,7 +46,6 @@ def create_environment(env_name: str, version: str = "24.4.0"):
             cfg.seek(0)
             cfg.write(content)
             cfg.truncate()
-        print(f"Environment '{env_name}' created successfully.")
         sys.exit(1)
     except FileNotFoundError:
         print(f"Error: Required file not found. Please check if '{environments_file}' and '{modular_cfg_path}' exist.")

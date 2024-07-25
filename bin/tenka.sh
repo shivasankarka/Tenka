@@ -281,10 +281,7 @@ if not change_cfg('$env_name', '$version'):
         return 1
     fi
 
-    if ! python "$HOME/.tenka/src/environments.py" create_environment "$env_name" "$version"; then
-        echo "Error: Failed to create environment in configuration" >&2
-        return 1
-    fi
+    python "$HOME/.tenka/src/environments.py" create_environment "$env_name" "$version"
     echo "Environment '$env_name' created successfully"
     ;;
   "delete" )
@@ -303,10 +300,8 @@ if not change_cfg('$env_name', '$version'):
       echo "Error: Cannot delete active environment" >&2
       return 1
     fi
-    if ! python "$HOME/.tenka/src/environments.py" delete_environment "$env_name"; then
-      echo "Error: Failed to delete environment from configuration" >&2
-      return 1
-    fi
+    python "$HOME/.tenka/src/environments.py" delete_environment "$env_name"
+    
     if [[ -d "$HOME/.tenka/envs/$env_name" ]]; then
       if ! rm -rf "$HOME/.tenka/envs/$env_name"; then
         echo "Error: Failed to delete environment directory" >&2

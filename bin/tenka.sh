@@ -123,19 +123,28 @@ tenka_cli() {
             echo
             echo -e "\e[1mSome useful tenka commands are:\e[0m"
             echo "------------------------------------------"
-            echo -e "   \e[1m COMMANDS \e[0m    \e[92mDESCRIPTION\e[0m"
+            echo -e "   \e[1m Environment Management \e[0m"
             echo "------------------------------------------"
             echo -e "   \e[1mcreate\e[0m        \e[92mCreate an environment\e[0m"
             echo -e "   \e[1mdelete\e[0m        \e[92mDelete an environment\e[0m"
             echo -e "   \e[1mactivate\e[0m      \e[92mActivate an environment\e[0m"
             echo -e "   \e[1mdeactivate\e[0m    \e[92mDeactivate the current environment\e[0m"
+            
+            echo "------------------------------------------"
+            echo -e "   \e[1m Package Management \e[0m"
+            echo "------------------------------------------"
             echo -e "   \e[1msearch\e[0m        \e[92mSearch for packages\e[0m"
             echo -e "   \e[1minstall\e[0m       \e[92mInstall a package in current environment\e[0m"
             echo -e "   \e[1muninstall\e[0m     \e[92mUninstall a package from current environment\e[0m"
             echo -e "   \e[1mpackage\e[0m       \e[92mPackage a mojo file and add it to the current environment\e[0m"
+            
+            echo "------------------------------------------"
+            echo -e "   \e[1m Information \e[0m"
+            echo "------------------------------------------"
             echo -e "   \e[1mcurrent\e[0m       \e[92mShow the current environment\e[0m"
             echo -e "   \e[1mlist-envs\e[0m     \e[92mList all environments\e[0m"
             echo -e "   \e[1mlist-pkgs\e[0m     \e[92mList all packages\e[0m"
+            echo -e "   \e[1mlist-mojo\e[0m     \e[92mList all available official Mojo versions\e[0m"
             ;;
         "current")
             shift 1
@@ -212,6 +221,13 @@ tenka_cli() {
     shift 1
     if ! python "$HOME/.tenka/src/main.py" "list-envs"; then
       echo "Error: Failed to list environments" >&2
+      return 1
+    fi
+    ;;
+  "list-mojo")
+    shift 1
+    if ! python "$HOME/.tenka/src/main.py" "list-mojo"; then
+      echo "Error: Failed to list Mojo versions" >&2
       return 1
     fi
     ;;

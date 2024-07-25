@@ -41,7 +41,8 @@ def setup_tenka(modular_home: str = "~/.modular"):
                 'version': 'v0.1',
                 'home': '~/.tenka/',
                 'modular-installed': False,
-                'mojo-installed': False
+                'mojo-installed': False,
+                'mojo-version': ''
             }
     }
     modular_installed = subprocess.run(["which", "modular"], capture_output=True, text=True).returncode == 0
@@ -50,6 +51,9 @@ def setup_tenka(modular_home: str = "~/.modular"):
     mojo_installed = subprocess.run(["which", "mojo"], capture_output=True, text=True).returncode == 0
     if mojo_installed:
         config['Tenka']['mojo-installed'] = True       
+    mojo_version = subprocess.run(["modular", "config", "mojo.version"], capture_output=True, text=True).stdout.strip()
+    if mojo_version:
+        config['Tenka']['mojo-version'] = mojo_version
     with open(os.path.join(home_dir, "config.json"), "w+") as file:
         json.dump(config, file, indent=4)
         
@@ -63,11 +67,6 @@ def setup_tenka(modular_home: str = "~/.modular"):
     if not os.path.exists(os.path.join(home_dir, "environments.json")):
         with open(os.path.join(home_dir, "environments.json"), "w") as file:
             json.dump(envs, file, indent=4)        
-
-    active_envs = {'active': 'base', 'version': modular_version}
-    if not os.path.exists(os.path.join(home_dir, "active.json")):
-        with open(os.path.join(home_dir, "active.json"), "w") as file:
-            json.dump(active_envs, file, indent=4)
             
     modular_dir = os.path.expanduser(modular_home)
     tenka_home  = os.path.join(home_dir, "envs", "base")
@@ -97,7 +96,15 @@ def setup_tenka(modular_home: str = "~/.modular"):
 }
 ''')
                 zshrc.write(f'export MODULAR_HOME="{os.path.expanduser(os.path.join(home_dir, "envs", "base"))}"\n')
-                zshrc.write(f'export PATH="{os.path.expanduser(os.path.join(home_dir, "envs", "base", "pkg", "packages.modular.com_mojo", "bin"))}:$PATH"\n')
+                zshrc.write(f'''
+if echo "$PATH" | grep -q "$HOME/.modular/pkg/packages.modular.com_mojo/bin"; then
+    export PATH=$(echo "$PATH" | sed "s|$HOME/.modular/pkg/packages.modular.com_mojo/bin|{os.path.expanduser(os.path.join(home_dir, "envs", "base", "pkg", "packages.modular.com_mojo", "bin"))}|")
+else
+    export PATH="{os.path.expanduser(os.path.join(home_dir, "envs", "base", "pkg", "packages.modular.com_mojo", "bin"))}:$PATH"
+fi
+''')
+                zshrc.write('export TENKA_ACTIVE_ENV="base"\n')
+                zshrc.write(f'export TENKA_ACTIVE_VERSION="{modular_version}"\n')
                 
     from colorama import Fore, Style, init
     init(autoreset=True)

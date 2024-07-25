@@ -61,7 +61,7 @@ Tenka simplifies the process of managing Mojo packages:
 
 - **Install Packages**: Add new packages to your environment effortlessly.
   ```
-  tenka install <package_name> [--branch <branch_name>]
+  tenka install <package_name> [<branch_name>]
   ```
   Install a package, with an optional ability to specify a branch of the GitHub repository.
 

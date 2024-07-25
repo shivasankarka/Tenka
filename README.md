@@ -16,11 +16,35 @@
     <hr style="border-top: 1px solid white; width: 100%; margin: 20px 0;">
 </p>
 
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#features">Features & Usage</a>
+      <ul>
+        <li><a href="#environment-management">Environment management </a></li>
+        <li><a href="#package-management">Package management</a></li>
+        <li><a href="#module-packaging">Module packaging</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#get-started">Get started</a>
+      <ul>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#uninstallation">Uninstallation</a></li>
+      </ul>
+    </li>
+    <li><a href="#limitations">Limitations</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+  </ol>
+</details>
+
 # Tenka 🔥: Ignite Your Mojo Development
 
 Tenka (点火, "ignition" in Japanese) is a robust package manager designed specifically for the Mojo programming language. It aims to streamline your development process by providing an intuitive way to manage Mojo environments and packages.
 
-## Features
+## Features & Usage
 
 ### Environment Management
 
@@ -42,7 +66,7 @@ Tenka provides powerful tools for managing your Mojo environments:
   ```
   tenka deactivate
   ```
-  This command deactivates the currently active environment.
+  This command deactivates the currently active environment. If base environment is deactivated, it returns to the default mojo installation in the system at `~/.modular`.
 
 - **Delete Environments**: Easily remove unused environments to free up space.
   ```
@@ -53,6 +77,11 @@ Tenka provides powerful tools for managing your Mojo environments:
 - **List Environments**: View all available environments.
   ```
   tenka list-envs
+  ```
+
+- **List Mojo**: View all available official Mojo release versions.
+  ```
+  tenka list-mojo
   ```
 
 ### Package Management
@@ -94,9 +123,15 @@ Tenka allows you to create and manage your own Mojo packages:
   - `<source_name>`: The name of the folder containing the .mojo files
   - `<package_name>`: The name of the package when imported in Mojo
   - `<source_path>`: (Optional) The path to the source folder. If not provided, Tenka will look in the current directory.
+Example: 
+  ```
+  tenka package src xyz
+  ```
+  This example searches the current directory and packages the `src` module so that it can be imported as `xyz` inside Mojo.
 
-## Installation
+## Get Started
 
+### Installation
 1. Clone the Tenka repository:
    ```
    git clone https://github.com/shivasankarka/Tenka.git
@@ -110,21 +145,21 @@ Tenka allows you to create and manage your own Mojo packages:
    python setup_tenka.py
    ```
 
-## Uninstallation
+### Uninstallation
 
 To remove Tenka from your system, follow these steps:
 
-1. Remove the Tenka directories:
+1. Delete the Tenka directories:
    ```
    rm -rf ~/.tenka
    ```
 
-2. Open your `.zshrc` file with your favorite editor:
+2. Open your `.zshrc` file using your preferred text editor:
    ```
    nano ~/.zshrc
    ```
 
-3. Locate and delete the following lines:
+3. Find and remove the following lines:
    ```
    # Tenka Package Manager
    tenka () {
@@ -136,15 +171,20 @@ To remove Tenka from your system, follow these steps:
    export TENKA_ACTIVE_ENV="base"
    export TENKA_ACTIVE_VERSION="..."
    ```
+4. Insert the following lines:
+    ```
+    MOJO_PATH = "'$HOME'/.modular/pkg/packages.modular.com_mojo" 
+    export MODULAR_HOME="'$HOME'/.modular"
+    export PATH="'$MOJO_PATH'/bin:$PATH"
+    ```
+5. Save your changes and exit the editor.
 
-4. Save the changes and exit the editor.
-
-5. Reload your shell configuration:
+6. Refresh your shell configuration:
    ```
    source ~/.zshrc
    ```
 
-After completing these steps, Tenka will be completely removed from your system.
+After completing these steps, Tenka will be completely removed from your system and you can use the default mojo version installed through modular.
 
 ## Limitations
 

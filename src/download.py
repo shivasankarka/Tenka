@@ -4,7 +4,57 @@ import zstandard
 import tarfile
 import io
 import sys
-from packages import get_latest_version_map, get_latest_version
+import urllib.request
+import re
+
+def get_latest_version():
+    url = "https://docs.modular.com/mojo/changelog"
+    try:
+        with urllib.request.urlopen(url) as response:
+            html = response.read().decode('utf-8')
+        
+        version_pattern =  r'<a class="table-of-contents__link toc-highlight" href="/mojo/changelog#(v[\d.]+)-.*?">(v[\d.]+)\s*\(.*?\)</a>'
+        versions = re.findall(version_pattern, html)
+
+        if versions:
+            version = versions[0][1][1:]
+            if len(version) == 4:
+                return version + ".0"
+            else:
+                return version
+        else:
+            print("No versions found")
+    except urllib.error.URLError as e:
+        print(f"An error occurred while fetching the webpage: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+def get_latest_version_map():
+    url = "https://docs.modular.com/mojo/changelog"
+    try:
+        with urllib.request.urlopen(url) as response:
+            html = response.read().decode('utf-8')
+        
+        # version_pattern = r'<a href="#(v[\d.]+).*?" class=".*?">(v[\d.]+)\s*\(.*?\)</a>'
+        version_pattern =  r'<a class="table-of-contents__link toc-highlight" href="/mojo/changelog#(v[\d.]+)-.*?">(v[\d.]+)\s*\(.*?\)</a>'
+        versions = re.findall(version_pattern, html)
+        version_map = {}
+        if versions:
+            versions = [v[1][1:] for v in versions]  # Extract version numbers
+            versions.sort(key=lambda v: [int(n) for n in v.split('.')])  # Sort versions
+            for i, version in enumerate(versions, start=1):
+                if len(version) == 4:
+                    version += ".0"
+                version_map[version] = i
+        else:
+            print("No versions found")
+        return version_map
+    except urllib.error.URLError as e:
+        print(f"An error occurred while fetching the webpage: {e}")
+        return {}
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return {}
 
 def download_package(version, env_name="base"):
     version_map = get_latest_version_map()

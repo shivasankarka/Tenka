@@ -154,61 +154,44 @@ class PackageManager:
             print(f"Key error when updating environments.json: {str(e)}")
         
     def uninstall(self, package_name, active_env="base"):
+        if not active_env:
+            raise ValueError("No active environment specified")
+
+        env_package_path = os.path.join(self.home_dir, "envs", active_env, "pkg", "packages.modular.com_mojo", "lib", "mojo")
+        package_path = os.path.join(env_package_path, f"{package_name}.mojopkg")
+
+        if not os.path.exists(package_path):
+            raise FileNotFoundError(f"Package {package_name} not found in environment {active_env}")
+
         try:
-            # Get active environment
-            # active_env_file_path = os.path.join(self.home_dir, 'active.json')
-            try:
-                # with open(active_env_file_path, 'r') as file:
-                    # temp = json.load(file)
-                # active_env = temp.get('active')
-                active_env = active_env
-                if not active_env:
-                    raise ValueError("No active environment found")
-            except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
-                print(f"Error reading active environment: {str(e)}")
-                return
+            os.remove(package_path)
+            print(f"Package {package_name} uninstalled successfully from {active_env} environment.")
+        except OSError as e:
+            raise OSError(f"Error removing package file: {str(e)}")
 
-            # Uninstall package
-            env_package_path = os.path.join(self.home_dir, "envs", active_env, "pkg", "packages.modular.com_mojo", "lib", "mojo")
-            package_path = os.path.join(env_package_path, f"{package_name}.mojopkg")
-            if os.path.exists(package_path):
-                try:
-                    os.remove(package_path)
-                    print(f"Package {package_name} uninstalled successfully.")
-                except OSError as e:
-                    print(f"Error removing package file: {str(e)}")
-                    return
-            else:
-                print(f"Package {package_name} not found.")
-                return
-
-            # Update environments.json
-            json_file_path = os.path.join(os.path.expanduser("~/.tenka"), 'environments.json')
-            try:
-                with open(json_file_path, 'r+') as f:
-                    environments = json.load(f)
-                    if active_env in environments:
-                        packages = environments[active_env].get('packages', [])
-                        packages = [pkg for pkg in packages if pkg['name'] != package_name]
-                        environments[active_env]['packages'] = packages
-                        f.seek(0)
-                        json.dump(environments, f, indent=4)
-                        f.truncate()
-                    else:
-                        print(f"Active environment {active_env} not found in {json_file_path}")
-            except FileNotFoundError:
-                print(f"File {json_file_path} not found")
-            except json.JSONDecodeError:
-                print(f"Error decoding JSON from {json_file_path}")
-            except IOError as e:
-                print(f"Error updating environments file: {str(e)}")
-
-        except Exception as e:
-            print(f"An unexpected error occurred: {str(e)}")
+        json_file_path = os.path.join(os.path.expanduser("~/.tenka"), 'environments.json')
+        
+        try:
+            with open(json_file_path, 'r+') as f:
+                environments = json.load(f)
+                if active_env not in environments:
+                    raise KeyError(f"Active environment {active_env} not found in {json_file_path}")
+                
+                packages = environments[active_env].get('packages', [])
+                packages = [pkg for pkg in packages if pkg['name'] != package_name]
+                environments[active_env]['packages'] = packages
+                
+                f.seek(0)
+                json.dump(environments, f, indent=4)
+                f.truncate()
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Environments file not found: {json_file_path}")
+        except json.JSONDecodeError:
+            raise json.JSONDecodeError(f"Error decoding JSON from {json_file_path}")
+        except IOError as e:
+            raise IOError(f"Error updating environments file: {str(e)}")
             
     def list_all_packages(self, active_env="base"):
-        # with open(os.path.join(os.path.expanduser("~/.tenka"), 'active.json'), 'r') as f:
-            # active_env = json.load(f)['active']
         active_env = active_env
 
         json_file_path = os.path.join(os.path.expanduser("~/.tenka"), 'environments.json')

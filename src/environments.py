@@ -2,7 +2,6 @@ import os
 import json
 import sys
 import datetime
-import shutil
 
 def get_all_envs():
     with open(os.path.expanduser('~/.tenka/environments.json'), 'r') as f:

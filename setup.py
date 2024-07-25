@@ -14,7 +14,6 @@ def setup_tenka(modular_home: str = "~/.modular"):
     os.makedirs(home_dir, exist_ok=True)
     os.makedirs(os.path.join(home_dir, "envs"), exist_ok=True)
 
-    #copy bin files
     os.makedirs(os.path.join(home_dir, "bin"), exist_ok=True)
     current_dir_bin = os.path.join(os.getcwd(), "bin")
     destination_dir = os.path.join(home_dir, "bin")
@@ -57,14 +56,10 @@ def setup_tenka(modular_home: str = "~/.modular"):
     with open(os.path.expanduser(os.path.join(modular_home, "modular.cfg")), "r") as file:
         lines = file.readlines()
         for line in lines:
-            if line.startswith("path =" or "path="):
-                modular_pkg_dir = line.split("=")[1].strip()
             if line.startswith("version =") or line.startswith("version="):
                 modular_version = line.split("=")[1].strip()
-        
     
-    # create a list of environments with base as default
-    envs = {'base': {'name': 'base', 'version': modular_version, 'description': f'Base environment with Mojo {modular_version}', 'created': datetime.datetime.now().isoformat()}}
+    envs = {'base': {'name': 'base', 'version': modular_version, 'description': f'Base environment with Mojo {modular_version}', 'created': datetime.datetime.now().isoformat(), 'packages': []}}
     if not os.path.exists(os.path.join(home_dir, "environments.json")):
         with open(os.path.join(home_dir, "environments.json"), "w") as file:
             json.dump(envs, file, indent=4)        
@@ -74,42 +69,22 @@ def setup_tenka(modular_home: str = "~/.modular"):
         with open(os.path.join(home_dir, "active.json"), "w") as file:
             json.dump(active_envs, file, indent=4)
             
-    base_dir = os.path.join(home_dir, "envs", "base")
-    for item in os.listdir(modular_pkg_dir):
-        item_path = os.path.join(modular_pkg_dir, item)
-        if os.path.isfile(item_path) or os.path.isdir(item_path) or os.path.islink(item_path):
-            if os.path.isfile(item_path) or os.path.islink(item_path):
-                shutil.copy2(item_path, base_dir, follow_symlinks=False)
-            elif os.path.isdir(item_path):
-                shutil.copytree(item_path, os.path.join(base_dir, item), dirs_exist_ok=True, symlinks=True)
-
-    # copies .modular files to tenka home
     modular_dir = os.path.expanduser(modular_home)
-    tenka_home = os.path.join(home_dir)
+    tenka_home  = os.path.join(home_dir, "envs", "base")
     for item in os.listdir(modular_dir):
-        if item != "pkg":
-            item_path = os.path.join(modular_dir, item)
-            if os.path.isfile(item_path):
-                shutil.copy(item_path, tenka_home)
-            elif os.path.isdir(item_path):
-                shutil.copytree(item_path, os.path.join(tenka_home, item), dirs_exist_ok=True)
+        item_path = os.path.join(modular_dir, item)
+        if os.path.isfile(item_path):
+            shutil.copy(item_path, tenka_home)
+        elif os.path.isdir(item_path):
+            shutil.copytree(item_path, os.path.join(tenka_home, item), dirs_exist_ok=True, symlinks=True)
         
-    with open(os.path.join(home_dir, "modular.cfg"), "r+") as file:
-        content = file.read()
-        content = content.replace(os.path.join(modular_home, "pkg/packages.modular.com_mojo"), os.path.join(home_dir, "envs", "base"))
-        file.seek(0)
-        file.write(content)
-        file.truncate()
-
-    # this is probably not needed
     with open(os.path.join(home_dir, "envs", "base", "modular.cfg"), "r+") as file:
         content = file.read()
-        content = content.replace(os.path.join(modular_home, "pkg/packages.modular.com_mojo"), os.path.join(home_dir, "envs", "base"))
+        content = content.replace(os.path.expanduser("~/.modular"), os.path.join(home_dir, "envs", "base"))
         file.seek(0)
         file.write(content)
         file.truncate()
-    
-    # Add Tenka to PATH and create activation functions in .zshrc if not already present
+   
     with open(os.path.join(home, ".zshrc"), "r") as zshrc:
         lines = zshrc.readlines()
         tenka_lines = ['# Tenka Package Manager\n']
@@ -121,21 +96,23 @@ def setup_tenka(modular_home: str = "~/.modular"):
     tenka_cli "$@"
 }
 ''')
-                zshrc.write(f'export MODULAR_HOME="{os.path.expanduser("~")}/.tenka/"\n')
-    
+                zshrc.write(f'export MODULAR_HOME="{os.path.expanduser(os.path.join(home_dir, "envs", "base"))}"\n')
+                zshrc.write(f'export PATH="{os.path.expanduser(os.path.join(home_dir, "envs", "base", "pkg", "packages.modular.com_mojo", "bin"))}:$PATH"\n')
+                
     from colorama import Fore, Style, init
     init(autoreset=True)
-    print(f"\n{Fore.YELLOW}{'*' * 50}")
-    print(f"{Fore.CYAN}{'🔥 Tenka 点火':^50}")
-    print(f"{Fore.YELLOW}{'*' * 50}\n")
 
-    print(f"{Style.BRIGHT}{Fore.GREEN}The setup is complete! To activate Tenka, please:")
-    print(f"{Fore.WHITE}  1. Restart your terminal")
-    print(f"{Fore.WHITE}     {Fore.YELLOW}or")
-    print(f"{Fore.WHITE}  2. Run {Fore.GREEN}'source ~/.zshrc'{Fore.WHITE} in your current session\n")
+    print(f"\n{Fore.YELLOW}{'=' * 50}")
+    print(f"{Fore.CYAN}{Style.BRIGHT}{'🔥 Tenka 点火':^50}")
+    print(f"{Fore.YELLOW}{'=' * 50}\n")
 
-    print(f"{Fore.CYAN} Happy coding - Fellow Mojician 🪄 🚀\n")
+    print(f"{Style.BRIGHT}{Fore.GREEN}✅ Setup Complete!")
+    print(f"{Fore.WHITE}To activate Tenka, please do one of the following:")
+    print(f"{Fore.YELLOW}  1. {Fore.WHITE}Restart your terminal")
+    print(f"{Fore.YELLOW}  2. {Fore.WHITE}Run {Fore.GREEN}'source ~/.zshrc'{Fore.WHITE} in your current session\n")
 
+    print(f"{Fore.CYAN}{Style.BRIGHT}Happy coding, Fellow Mojician! 🪄 🚀\n")
+    print(f"{Fore.YELLOW}{'=' * 50}\n")
 
 if __name__ == "__main__":
     import sys

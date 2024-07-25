@@ -5,6 +5,8 @@ import subprocess
 import datetime
 import json
 import sys
+import urllib.request
+import re
 
 class PackageManager:
     def __init__(self):
@@ -41,11 +43,6 @@ class PackageManager:
 
     def install_package(self, package_name, branch=False, active_env="base"):
         try:
-            # Get active environment
-            # active_env_file_path = os.path.join(self.home_dir, 'active.json')
-            # with open(active_env_file_path, 'r') as file:
-                # temp = json.load(file)
-            # active_env = temp.get('active')
             active_env = active_env
             if not active_env:
                 raise ValueError("No active environment found")
@@ -205,6 +202,31 @@ class PackageManager:
                     print(f"{package['name']:<20} {package['branch']:<15}")
             else:
                 print("No external packages installed")
+
+    # TODO: list all dates of release too
+    def list_mojo(self):
+        url = "https://docs.modular.com/mojo/changelog"
+        try:
+            with urllib.request.urlopen(url) as response:
+                html = response.read().decode('utf-8')
+            
+            version_pattern = r'<a class="table-of-contents__link toc-highlight" href="/mojo/changelog#(v[\d.]+)-.*?">(v[\d.]+)\s*\(.*?\)</a>'
+            versions = re.findall(version_pattern, html)
+            
+            if not versions:
+                raise ValueError("No versions found in the changelog")
+            
+            print("\n--- Available Mojo Versions ---")
+            for i, version in enumerate(versions, start=1):
+                version = f"{version[1][1:]}.0" if len(version[1][1:]) == 4 else version[1][1:]
+                print(f"{i}. {version}")
+            
+        except urllib.error.URLError as e:
+            raise ConnectionError(f"Failed to fetch the changelog: {e}")
+        except ValueError as e:
+            raise e
+        except Exception as e:
+            raise RuntimeError(f"An unexpected error occurred while getting the version map: {e}")
     
     def list_all_environments(self):
         json_file_path = os.path.join(os.path.expanduser("~/.tenka"), 'environments.json')
@@ -233,6 +255,8 @@ if __name__ == "__main__":
         manager.list_all_packages(active_env=sys.argv[2])
     elif command == "list-envs" and len(sys.argv) == 2:
         manager.list_all_environments()
+    elif command == "list-mojo" and len(sys.argv) == 2:
+        manager.list_mojo()
     else:
         print("Usage: python environments.py <command> [<args>]")
         sys.exit(1)

@@ -37,21 +37,23 @@ def update_package_metadata(active_env: str, package_name: str, branch: None):
 
 def get_latest_version():
     url = "https://docs.modular.com/mojo/changelog"
-    
     try:
         with urllib.request.urlopen(url) as response:
             html = response.read().decode('utf-8')
         
-        version_pattern = r'<a href="#(v[\d.]+).*?" class=".*?">(v[\d.]+)\s*\(.*?\)</a>'
+        # version_pattern = r'<a href="#(v[\d.]+).*?" class=".*?">(v[\d.]+)\s*\(.*?\)</a>'
+        version_pattern =  r'<a class="table-of-contents__link toc-highlight" href="/mojo/changelog#(v[\d.]+)-.*?">(v[\d.]+)\s*\(.*?\)</a>'
         versions = re.findall(version_pattern, html)
-        
+
         if versions:
             version = versions[0][1][1:]
+            print(version)
             if len(version) == 4:
-                # return version + ".0"
-                print(version + ".0")
+                return version + ".0"
+                # print(version + ".0")
             else:
-                print(version)
+                return version
+                # print(version)
         else:
             print("No versions found")
     except urllib.error.URLError as e:

@@ -91,7 +91,6 @@ def extract_package(file_path: str):
                 with tarfile.open(fileobj=io.BytesIO(reader.read())) as tar:
                     tar.extractall(path=os.path.dirname(file_path))
         os.remove(file_path)
-        print(f"Successfully extracted and removed {file_path}")
     except FileNotFoundError:
         print(f"Error: The file {file_path} was not found")
     except tarfile.TarError as e:
